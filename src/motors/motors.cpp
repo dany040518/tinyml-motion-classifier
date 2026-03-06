@@ -1,5 +1,5 @@
 #include "motors.h"
-#include "config.h"
+#include "../../include/config.h"
 
 // ================================================================
 //  motors.cpp — Implementación del control de motores

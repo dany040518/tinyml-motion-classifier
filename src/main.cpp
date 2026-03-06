@@ -4,68 +4,77 @@
 #include "camera/camera.h"
 #include "ml/classifier.h"
 
-void setup() {
-
-    Serial.begin(115200);
-
-    camera_init();
-    motors_init();
-}
-
-void loop() {
-
-    String prediction = run_classifier_camera();
-
-    ejecutarDecision(prediction);
-
-}
-
 // ================================================================
 //  main.cpp — Controlador principal del sistema CarControl AIoT
 //  Proyecto: CarControl AIoT (XIAO ESP32-S3 Sense)
 //  Framework: Arduino | Plataforma: PlatformIO
 //
-//  Estado actual del proyecto:
-//    ✅ Etapa 2 — Control de motores (motors.h / motors.cpp)
-//    ✅ Etapa 3 — Lógica de navegación (navigation.h / navigation.cpp)
-//    🔄 Etapa 4 — Integración modelo Edge Impulse (pendiente)
-//
-//  SIMULACIÓN TEMPORAL:
-//    Se itera sobre un arreglo de predicciones ficticias para
-//    verificar que cada acción del carrito se ejecuta correctamente.
-//    Cuando el modelo Edge Impulse esté listo, reemplazar la
-//    variable `prediction` con la salida real del clasificador.
+//  Flujo del loop:
+//    1. Leer IMU → si hay inclinación peligrosa → detener (seguridad)
+//    2. Capturar imagen con la cámara → inspeccionar buffer
+//    3. Simular predicción ML → ejecutar decisión de movimiento
 // ================================================================
+
+// ---- Intervalo entre ciclos completos (ms) --------------------
+const unsigned long LOOP_INTERVAL_MS = 3000;
+unsigned long lastLoopTime = 0;
 
 // ---- Simulación: secuencia de predicciones de prueba ----------
 const String testPredictions[] = { "none", "left", "none", "right", "none", "stop" };
 const int    numPredictions     = sizeof(testPredictions) / sizeof(testPredictions[0]);
 int          predIndex          = 0;
 
-// ---- Intervalo entre cada decisión simulada (ms) --------------
-const unsigned long DECISION_INTERVAL_MS = 2000;
-unsigned long lastDecisionTime = 0;
+// ---- Callback de cámara: se ejecuta con el frame capturado ----
+//  En la Etapa 4 este callback pasará fb->buf a Edge Impulse.
+//  Por ahora solo imprime información del frame para verificar.
+void onFrameCaptured(camera_fb_t* fb) {
+    Serial.println("[main] === Datos del frame capturado ===");
+    Serial.print("  Resolución : ");
+    Serial.print(fb->width);
+    Serial.print(" x ");
+    Serial.println(fb->height);
+    Serial.print("  Tamaño buf : ");
+    Serial.print(fb->len);
+    Serial.println(" bytes");
+    Serial.print("  Primer px  : ");
+    Serial.println(fb->buf[0]);
+    Serial.print("  Último px  : ");
+    Serial.println(fb->buf[fb->len - 1]);
+
+    // -------------------------------------------------------
+    // TODO (Etapa 4): Aquí se integrará Edge Impulse:
+    //
+    //   signal_t signal;
+    //   numpy::signal_from_buffer(fb->buf, fb->len, &signal);
+    //   ei_impulse_result_t result;
+    //   run_classifier(&signal, &result, false);
+    //   String prediction = result.classification[...].label;
+    //   ejecutarDecision(prediction);
+    // -------------------------------------------------------
+}
 
 // ================================================================
 //  setup()
 // ================================================================
 void setup() {
     Serial.begin(115200);
-    delay(500);
+    delay(800);
 
     Serial.println("================================================");
     Serial.println("  CarControl AIoT — XIAO ESP32-S3 Sense");
-    Serial.println("  Etapas 2 y 3: Motores + Navegación");
-    Serial.println("  [MODO SIMULACIÓN — sin modelo ML aún]");
-    Serial.println("================================================");
+    Serial.println("  Etapas 2, 3, 5 y 6: Motores + Nav + Cam");
+    Serial.println("  [MODO SIMULACION — sin modelo ML aun]");
+    Serial.println("================================================\n");
 
-    // Inicializar el módulo de motores
     motors_init();
 
-    // Asegurar estado inicial: detenido
-    detener();
+    bool camOk = camera_init();
+    if (!camOk) {
+        Serial.println("[main] ADVERTENCIA: camara no disponible. Continuando sin ella.");
+    }
 
-    Serial.println("[main] Sistema listo. Iniciando simulación...\n");
+    detener();
+    Serial.println("\n[main] Sistema listo. Iniciando ciclo principal...\n");
 }
 
 // ================================================================
@@ -74,34 +83,27 @@ void setup() {
 void loop() {
     unsigned long ahora = millis();
 
-    // Ejecutar una nueva decisión cada DECISION_INTERVAL_MS ms
-    if (ahora - lastDecisionTime >= DECISION_INTERVAL_MS) {
-        lastDecisionTime = ahora;
+    if (ahora - lastLoopTime >= LOOP_INTERVAL_MS) {
+        lastLoopTime = ahora;
 
-        // -------------------------------------------------------
-        // TODO (Etapa 4): Reemplazar esta línea por la predicción
-        //                 real del modelo Edge Impulse:
-        //
-        //   String prediction = getMLPrediction();
-        //
-        // Por ahora usamos la simulación:
-        // -------------------------------------------------------
-        String prediction = testPredictions[predIndex];
-
+        Serial.println("================================================");
         Serial.print("[main] Ciclo ");
         Serial.print(predIndex + 1);
-        Serial.print("/");
-        Serial.print(numPredictions);
-        Serial.print(" → simulando predicción: \"");
+        Serial.print(" / ");
+        Serial.println(numPredictions);
+
+        // ---- PASO 1: Capturar imagen con la cámara ---------
+        camera_capture(onFrameCaptured);
+
+        // ---- PASO 2: Simular predicción ML y decidir -------
+        String prediction = testPredictions[predIndex];
+        Serial.print("[main] Prediccion simulada: \"");
         Serial.print(prediction);
         Serial.println("\"");
 
-        // Pasar la predicción al módulo de navegación
         ejecutarDecision(prediction);
 
-        // Avanzar al siguiente índice (cíclico)
         predIndex = (predIndex + 1) % numPredictions;
-
-        Serial.println(); // Separador visual en Serial Monitor
+        Serial.println();
     }
 }
