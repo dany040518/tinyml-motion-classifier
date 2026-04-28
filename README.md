@@ -5,7 +5,7 @@ This project demonstrates the design and implementation of a small-scale autonom
 
 ---
 
-## 🚀 Overview
+## Overview
 
 The vehicle utilizes a sophisticated **Perception-Decision-Action** architecture distributed across two microcontrollers. By executing machine learning models directly on the edge, the system achieves low-latency response times without dependency on cloud infrastructure, making it an ideal prototype for smart mobility and automotive engineering applications.
 
@@ -17,7 +17,7 @@ The vehicle utilizes a sophisticated **Perception-Decision-Action** architecture
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 The system is built on a modular architecture designed for high-performance edge deployment:
 
@@ -33,7 +33,7 @@ The system is built on a modular architecture designed for high-performance edge
 
 ---
 
-## 🧠 TinyML Pipeline
+## TinyML Pipeline
 
 The core of the vehicle's intelligence is a visual classifier trained to recognize international traffic signs.
 
@@ -56,7 +56,7 @@ The core of the vehicle's intelligence is a visual classifier trained to recogni
 
 ---
 
-## 🛠️ Hardware Stack
+## Hardware Stack
 
 - **Primary MCU:** Seeed Studio XIAO ESP32-S3 Sense (8MB PSRAM).
 - **Secondary MCU:** ESP32 (General Purpose).
@@ -66,7 +66,7 @@ The core of the vehicle's intelligence is a visual classifier trained to recogni
 
 ---
 
-## 🌐 IoT Visualization Interface
+## IoT Visualization Interface
 
 The vehicle hosts a local web server that provides:
 - **Live Stream:** Real-time MJPEG video feed from the vehicle's perspective.
@@ -75,7 +75,7 @@ The vehicle hosts a local web server that provides:
 
 ---
 
-## 🔮 Future Roadmap (The "FOMO" Evolution)
+## Future Roadmap (The "FOMO" Evolution)
 
 While our current classification-based approach is highly effective, we are transitioning towards **Object Detection (FOMO - Faster Objects, More Objects)**.
 - **Spatial Awareness:** Transitioning from "whole frame" classification to specific object localization.
@@ -84,10 +84,10 @@ While our current classification-based approach is highly effective, we are tran
 
 ---
 
-## 👥 Authors
+## Authors
 
 - **Danna Alejandra Sánchez** - *System Design & AI Integration*
-- **Jorge Enrique Lugo Lopez** - *Hardware Architecture & Low-Level Control*
+- **Wilson Santiago Bonilla Guevara** - *Hardware Architecture & Low-Level Control*
 
 *Project developed at Universidad de La Sabana.*
 
