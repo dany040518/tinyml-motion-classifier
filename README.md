@@ -92,4 +92,4 @@ While our current classification-based approach is highly effective, we are tran
 *Project developed at Universidad de La Sabana.*
 
 ---
-**Targeting Automotive Innovation:** This project is designed as a proof-of-concept for scalable, low-cost autonomous systems, aligning with the engineering excellence standards of leaders like **FEV Iberia**.
+**Targeting Automotive Innovation:** This project is designed as a proof-of-concept for scalable and low-cost autonomous systems.
